@@ -54,13 +54,14 @@ class Adapter:
         IEEE1394 = 144
 
     class Status(Enum):
-        UNKNOWN = 0
-        NOTPRESENT = 1
+        NONE = 0
+        UP = 1
         DOWN = 2
-        LOWERLAYERDOWN = 3
-        TESTING = 4
+        TESTING = 3
+        UNKNOWN = 4
         DORMANT = 5
-        UP = 6
+        NOTPRESENT = 6
+        LOWERLAYERDOWN = 7
 
     name: str
     nice_name: str

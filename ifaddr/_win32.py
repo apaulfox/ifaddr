@@ -23,7 +23,7 @@ import ctypes
 import sys
 from ctypes import wintypes
 from dataclasses import dataclass
-from enum import Flag
+from enum import IntFlag
 from typing import Iterable, List, TypeVar, Union
 
 import ifaddr._shared as shared
@@ -150,7 +150,7 @@ class IPAdapterAddress:
     zone_indices: List[int]
     # Not implemented yet: there's a bunch of extra properties left in IP_ADAPTER_ADDRESSES
 
-class WinFlags(Flag):
+class WinFlags(IntFlag):
     IP_ADAPTER_DDNS_ENABLED = 0x0001
     IP_ADAPTER_REGISTER_ADAPTER_SUFFIX = 0x0002
     IP_ADAPTER_DHCP_ENABLED = 0x0004
@@ -275,10 +275,10 @@ def convert_win32_adapters(
         oper_status = shared.Adapter.Status(adapter.oper_status)
 
         flags: shared.Adapter.Flags = shared.Adapter.Flags(0)
-        win_flags = WinFlags(adapter.flags)
-        if WinFlags.IP_ADAPTER_DHCP_ENABLED in win_flags:
+        win_flags = adapter.flags
+        if WinFlags.IP_ADAPTER_DHCP_ENABLED & win_flags:
             flags = flags | shared.Adapter.Flags.DYNAMIC
-        if WinFlags.IP_ADAPTER_NO_MULTICAST in win_flags:
+        if WinFlags.IP_ADAPTER_NO_MULTICAST & win_flags:
             pass
         else:
             flags = flags | shared.Adapter.Flags.MULTICAST
