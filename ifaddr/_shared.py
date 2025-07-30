@@ -138,8 +138,10 @@ class Adapter:
         )
     
     def __str__(self) -> str:
-        ip_strings = "\n".join((str(ip) for ip in self.ips))
-        return f'''{self.index}: {self.name}\t{self.nice_name}\t{self.description}\t{self.adapter_type.name}\tStatus: {self.status.name}\tFlags: <{str(self.flags)}>\n{ip_strings}'''
+        ip_strings = '\n\t'.join((str(ip) for ip in self.ips)) if self.ips else ''
+        return f'''{self.index}:  {self.name}  {self.nice_name}  {self.description}  {self.adapter_type.name}
+\tStatus: {self.status.name}  Flags: <{str(self.flags)}>
+\t{ip_strings}'''
 
 
 # Technically we don't need this wrapper but when dealing with an IPv4, IPv6 union it's nice
@@ -212,7 +214,11 @@ class IP:
         )
     
     def __str__(self) -> str:
-        return f'{self.nice_name}: {self.ip}/{self.network_prefix}'
+        if isinstance(self.ip, tuple):
+            # Return IP, flowinfo, scope_id
+            return f'{self.ip[0]} {self.ip[1]} {self.ip[2]}'
+        else:
+            return self.ip
 
 import sys
 
