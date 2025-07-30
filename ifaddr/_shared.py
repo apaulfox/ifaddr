@@ -23,6 +23,7 @@ import ctypes
 import socket
 import ipaddress
 from dataclasses import dataclass
+from enum import Enum, Flag, auto
 
 from typing import List, Optional, Union
 
@@ -37,20 +38,48 @@ class Adapter:
     of this class. Each of those 'virtual' adapters can have both
     a IPv4 and an IPv6 IP address.
     """
+    class Flags(Flag):
+        MULTICAST = 1
+        DYNAMIC = 2
+
+    class AdapterType(Enum):
+        UNKNOWN = 0
+        OTHER = 1
+        ETHERNET_CSMACD = 6
+        ISO88025_TOKENRING = 9
+        PPP = 24
+        ATM = 37
+        IEEE80211 = 71
+        TUNNEL = 131
+        IEEE1394 = 144
+
+    class Status(Enum):
+        UNKNOWN = 0
+        NOTPRESENT = 1
+        DOWN = 2
+        LOWERLAYERDOWN = 3
+        TESTING = 4
+        DORMANT = 5
+        UP = 6
 
     name: str
     nice_name: str
     ips: List['IP']
     index: Optional[int]
     multicast: bool
-
+    adapter_type: AdapterType
+    flags: Flags
+    status: Status
+    
     def __init__(
         self,
         name: str,
         nice_name: str,
         ips: List['IP'],
         index: Optional[int] = None,
-        multicast: bool = True,
+        flags: Flags = Flags(0),
+        adapter_type: AdapterType = AdapterType(0),
+        status: Status = Status(0)
     ) -> None:
         #: Unique name that identifies the adapter in the system.
         #: On Linux this is of the form of `eth0` or `eth0:1`, on
@@ -70,16 +99,32 @@ class Adapter:
         #: Adapter index as used by some API (e.g. IPv6 multicast group join).
         self.index = index
 
-        #: If this adapter supports multicast
-        self.multicast = multicast
+        # Flags with additional info about the interface
+        self.flags = flags
+
+        # Type of adapter (Loopback, Ethernet, WiFi, etc.)
+        self.adapter_type = adapter_type
+
+        # Operational status according to RFC 2863
+        self.status = status
+
+    @property
+    def multicast(self) -> bool:
+        return bool(self.flags | self.Flags.MULTICAST)
+    
+    @property
+    def dynamic(self) -> bool:
+        return bool(self.flags | self.Flags.DYNAMIC)
 
     def __repr__(self) -> str:
-        return 'Adapter(name={name}, nice_name={nice_name}, ips={ips}, index={index}, multicast={multicast})'.format(
+        return 'Adapter(name={name}, nice_name={nice_name}, ips={ips}, index={index}, flags={flags}, type={adapter_type}, status={status})'.format(
             name=repr(self.name),
             nice_name=repr(self.nice_name),
             ips=repr(self.ips),
             index=repr(self.index),
-            multicast=repr(self.multicast),
+            flags=repr(self.flags),
+            adapter_type=repr(self.adapter_type.name),
+            status=self.status
         )
 
 

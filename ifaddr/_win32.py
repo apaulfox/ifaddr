@@ -23,6 +23,7 @@ import ctypes
 import sys
 from ctypes import wintypes
 from dataclasses import dataclass
+from enum import Flag
 from typing import Iterable, List, TypeVar, Union
 
 import ifaddr._shared as shared
@@ -149,6 +150,12 @@ class IPAdapterAddress:
     zone_indices: List[int]
     # Not implemented yet: there's a bunch of extra properties left in IP_ADAPTER_ADDRESSES
 
+class WinFlags(Flag):
+    IP_ADAPTER_DDNS_ENABLED = 0x0001
+    IP_ADAPTER_REGISTER_ADAPTER_SUFFIX = 0x0002
+    IP_ADAPTER_DHCP_ENABLED = 0x0004
+    IP_ADAPTER_RECEIVE_ONLY = 0x0008
+    IP_ADAPTER_NO_MULTICAST = 0x0010
 
 iphlpapi = ctypes.windll.LoadLibrary('Iphlpapi')
 
@@ -264,14 +271,25 @@ def convert_win32_adapters(
         name = adapter.adapter_name
         nice_name = adapter.description
         index = adapter.if_index
+        adapter_type = shared.Adapter.AdapterType(adapter.if_type)
+        oper_status = shared.Adapter.Status(adapter.oper_status)
+
+        flags: shared.Adapter.Flags = shared.Adapter.Flags(0)
+        win_flags = WinFlags(adapter.flags)
+        if WinFlags.IP_ADAPTER_DHCP_ENABLED in win_flags:
+            flags = flags | shared.Adapter.Flags.DYNAMIC
+        if WinFlags.IP_ADAPTER_NO_MULTICAST in win_flags:
+            pass
+        else:
+            flags = flags | shared.Adapter.Flags.MULTICAST
 
         if adapter.unicast_addresses:
             ips = [
                 shared.IP(a.address, a.on_link_prefix_length, adapter.friendly_name)
                 for a in adapter.unicast_addresses
             ]
-            result.append(shared.Adapter(name, nice_name, ips, index=index))
+            result.append(shared.Adapter(name, nice_name, ips, index=index, flags=flags, adapter_type=adapter_type, status=oper_status))
         elif include_unconfigured:
-            result.append(shared.Adapter(name, nice_name, [], index=index))
+            result.append(shared.Adapter(name, nice_name, [], index=index, flags=flags, adapter_type=adapter_type, status=oper_status))
 
     return result
