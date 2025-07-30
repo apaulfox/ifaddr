@@ -42,6 +42,9 @@ class Adapter:
         MULTICAST = 1
         DYNAMIC = 2
 
+        def __str__(self):
+            return ','.join((value.name for value in self))
+
     class AdapterType(Enum):
         UNKNOWN = 0
         OTHER = 1
@@ -133,6 +136,10 @@ class Adapter:
             adapter_type=repr(self.adapter_type.name),
             status=self.status
         )
+    
+    def __str__(self) -> str:
+        ip_strings = "\n".join((str(ip) for ip in self.ips))
+        return f'''{self.index}: {self.name}\t{self.nice_name}\t{self.description}\t{self.adapter_type.name}\tStatus: {self.status.name}\tFlags: <{str(self.flags)}>\n{ip_strings}'''
 
 
 # Technically we don't need this wrapper but when dealing with an IPv4, IPv6 union it's nice
@@ -203,7 +210,9 @@ class IP:
             network_prefix=repr(self.network_prefix),
             nice_name=repr(self.nice_name),
         )
-
+    
+    def __str__(self) -> str:
+        return f'{self.nice_name}: {self.ip}/{self.network_prefix}'
 
 import sys
 
