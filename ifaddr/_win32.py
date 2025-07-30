@@ -269,7 +269,8 @@ def convert_win32_adapters(
     result: List[shared.Adapter] = []
     for adapter in adapters:
         name = adapter.adapter_name
-        nice_name = adapter.description
+        nice_name = adapter.friendly_name
+        description = adapter.description
         index = adapter.if_index
         adapter_type = shared.Adapter.AdapterType(adapter.if_type)
         oper_status = shared.Adapter.Status(adapter.oper_status)
@@ -288,8 +289,8 @@ def convert_win32_adapters(
                 shared.IP(a.address, a.on_link_prefix_length, adapter.friendly_name)
                 for a in adapter.unicast_addresses
             ]
-            result.append(shared.Adapter(name, nice_name, ips, index=index, flags=flags, adapter_type=adapter_type, status=oper_status))
+            result.append(shared.Adapter(name, nice_name, description, ips, index=index, flags=flags, adapter_type=adapter_type, status=oper_status))
         elif include_unconfigured:
-            result.append(shared.Adapter(name, nice_name, [], index=index, flags=flags, adapter_type=adapter_type, status=oper_status))
+            result.append(shared.Adapter(name, nice_name, description, [], index=index, flags=flags, adapter_type=adapter_type, status=oper_status))
 
     return result

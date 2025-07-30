@@ -23,7 +23,7 @@ import ctypes
 import socket
 import ipaddress
 from dataclasses import dataclass
-from enum import Enum, Flag, auto
+from enum import Enum, Flag
 
 from typing import List, Optional, Union
 
@@ -65,6 +65,7 @@ class Adapter:
 
     name: str
     nice_name: str
+    description: str
     ips: List['IP']
     index: Optional[int]
     multicast: bool
@@ -76,6 +77,7 @@ class Adapter:
         self,
         name: str,
         nice_name: str,
+        description: str,
         ips: List['IP'],
         index: Optional[int] = None,
         flags: Flags = Flags(0),
@@ -92,6 +94,9 @@ class Adapter:
         #: is currently the same as :attr:`name`. On Windows
         #: this is the name of the device.
         self.nice_name = nice_name
+
+        # Description of the device
+        self.description = description
 
         #: List of :class:`ifaddr.IP` instances in the order they were
         #: reported by the system.
@@ -118,9 +123,10 @@ class Adapter:
         return bool(self.flags | self.Flags.DYNAMIC)
 
     def __repr__(self) -> str:
-        return 'Adapter(name={name}, nice_name={nice_name}, ips={ips}, index={index}, flags={flags}, type={adapter_type}, status={status})'.format(
+        return 'Adapter(name={name}, nice_name={nice_name}, description={description}, ips={ips}, index={index}, flags={flags}, type={adapter_type}, status={status})'.format(
             name=repr(self.name),
             nice_name=repr(self.nice_name),
+            description=repr(self.description),
             ips=repr(self.ips),
             index=repr(self.index),
             flags=repr(self.flags),
