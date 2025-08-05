@@ -272,17 +272,17 @@ def convert_win32_adapters(
         nice_name = adapter.friendly_name
         description = adapter.description
         index = adapter.if_index
-        adapter_type = shared.Adapter.AdapterType(adapter.if_type)
-        oper_status = shared.Adapter.Status(adapter.oper_status)
+        adapter_type = shared.AdapterType(adapter.if_type)
+        oper_status = shared.OperStatus(adapter.oper_status)
 
-        flags: shared.Adapter.Flags = shared.Adapter.Flags(0)
+        flags: shared.AdapterFlags = shared.AdapterFlags(0)
         win_flags = adapter.flags
         if WinFlags.IP_ADAPTER_DHCP_ENABLED & win_flags:
-            flags = flags | shared.Adapter.Flags.DYNAMIC
+            flags = flags | shared.AdapterFlags.DYNAMIC
         if WinFlags.IP_ADAPTER_NO_MULTICAST & win_flags:
             pass
         else:
-            flags = flags | shared.Adapter.Flags.MULTICAST
+            flags = flags | shared.AdapterFlags.MULTICAST
 
         if adapter.unicast_addresses:
             ips = [

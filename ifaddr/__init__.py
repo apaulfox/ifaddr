@@ -21,11 +21,11 @@
 
 import sys
 
-from ifaddr._shared import Adapter, IP
+from ifaddr._shared import Adapter, AdapterType, AdapterFlags, OperStatus, IP
 
 if sys.platform == 'win32':
     from ifaddr._win32 import get_adapters
 else:
     from ifaddr._posix import get_adapters
 
-__all__ = ['Adapter', 'IP', 'get_adapters']
+__all__ = ['Adapter', 'AdapterType', 'AdapterFlags', 'OperStatus', 'IP', 'get_adapters']

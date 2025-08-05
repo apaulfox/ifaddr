@@ -27,6 +27,33 @@ from enum import Enum, Flag
 
 from typing import List, Optional, Union
 
+class AdapterType(Enum):
+    UNKNOWN = 0
+    OTHER = 1
+    ETHERNET_CSMACD = 6
+    ISO88025_TOKENRING = 9
+    PPP = 24
+    ATM = 37
+    IEEE80211 = 71
+    TUNNEL = 131
+    IEEE1394 = 144
+
+class AdapterFlags(Flag):
+    MULTICAST = 1
+    DYNAMIC = 2
+
+    def __str__(self):
+        return ','.join([value.name for value in self])
+
+class OperStatus(Enum):
+    NONE = 0
+    UP = 1
+    DOWN = 2
+    TESTING = 3
+    UNKNOWN = 4
+    DORMANT = 5
+    NOTPRESENT = 6
+    LOWERLAYERDOWN = 7
 
 class Adapter:
     """
@@ -38,43 +65,15 @@ class Adapter:
     of this class. Each of those 'virtual' adapters can have both
     a IPv4 and an IPv6 IP address.
     """
-    class Flags(Flag):
-        MULTICAST = 1
-        DYNAMIC = 2
-
-        def __str__(self):
-            return ','.join((value.name for value in self))
-
-    class AdapterType(Enum):
-        UNKNOWN = 0
-        OTHER = 1
-        ETHERNET_CSMACD = 6
-        ISO88025_TOKENRING = 9
-        PPP = 24
-        ATM = 37
-        IEEE80211 = 71
-        TUNNEL = 131
-        IEEE1394 = 144
-
-    class Status(Enum):
-        NONE = 0
-        UP = 1
-        DOWN = 2
-        TESTING = 3
-        UNKNOWN = 4
-        DORMANT = 5
-        NOTPRESENT = 6
-        LOWERLAYERDOWN = 7
 
     name: str
     nice_name: str
     description: str
     ips: List['IP']
     index: Optional[int]
-    multicast: bool
     adapter_type: AdapterType
-    flags: Flags
-    status: Status
+    flags: AdapterFlags
+    status: OperStatus
     
     def __init__(
         self,
@@ -83,9 +82,9 @@ class Adapter:
         description: str,
         ips: List['IP'],
         index: Optional[int] = None,
-        flags: Flags = Flags(0),
+        flags: AdapterFlags = AdapterFlags(0),
         adapter_type: AdapterType = AdapterType(0),
-        status: Status = Status(0)
+        status: OperStatus = OperStatus(0)
     ) -> None:
         #: Unique name that identifies the adapter in the system.
         #: On Linux this is of the form of `eth0` or `eth0:1`, on
@@ -119,11 +118,11 @@ class Adapter:
 
     @property
     def multicast(self) -> bool:
-        return bool(self.flags | self.Flags.MULTICAST)
+        return bool(self.flags & AdapterFlags.MULTICAST)
     
     @property
     def dynamic(self) -> bool:
-        return bool(self.flags | self.Flags.DYNAMIC)
+        return bool(self.flags & AdapterFlags.DYNAMIC)
 
     def __repr__(self) -> str:
         return 'Adapter(name={name}, nice_name={nice_name}, description={description}, ips={ips}, index={index}, flags={flags}, type={adapter_type}, status={status})'.format(
