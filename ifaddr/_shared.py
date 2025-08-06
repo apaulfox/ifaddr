@@ -52,8 +52,8 @@ class OperStatus(Enum):
     TESTING = 3
     UNKNOWN = 4
     DORMANT = 5
-    NOTPRESENT = 6
-    LOWERLAYERDOWN = 7
+    NOT_PRESENT = 6
+    LOWER_LAYER_DOWN = 7
 
 class Adapter:
     """
